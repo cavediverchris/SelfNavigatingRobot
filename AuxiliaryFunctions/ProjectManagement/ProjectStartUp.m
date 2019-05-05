@@ -22,23 +22,31 @@ close all
 % Print message to screen.
 disp(['Initialising Project : ',projectName])
 
-% Create the location of slprj to be the "work" folder of the current project:
-myCacheFolder = fullfile(projectRoot, 'SimulationRunTimeFiles');
-if ~exist(myCacheFolder, 'dir')
-    mkdir(myCacheFolder)
+if verLessThan('matlab','R2018B')
+    % CASE: R2018B template project includes parameters to automatically
+    % set both the code-gen and cache folders.
+    % ACTION: only in earlier releases is manual specification of these
+    % paths required.
+    
+    % Create the location of slprj to be the "work" folder of the current project:
+    myCacheFolder = fullfile(projectRoot, 'SimulationRunTimeFiles');
+    if ~exist(myCacheFolder, 'dir')
+        mkdir(myCacheFolder)
+    end
+    
+    % Create the location for any files generated during build for code
+    % generation.
+    myCodeGenFolder = fullfile(projectRoot, 'CompiledCode');
+    if ~exist(myCodeGenFolder, 'dir')
+        mkdir(myCodeGenFolder)
+    end
+    
+    % Set both the code generation and work folder paths.
+    Simulink.fileGenControl('set', 'CacheFolder', myCacheFolder, ...
+        'CodeGenFolder', myCodeGenFolder);
+    
+    clear myCacheFolder myCodeGenFolder;
 end
-
-% Create the location for any files generated during build for code
-% generation.
-myCodeGenFolder = fullfile(projectRoot, 'CompiledCode');
-if ~exist(myCodeGenFolder, 'dir')
-    mkdir(myCodeGenFolder)
-end
-
-% Set both the code generation and work folder paths.
-Simulink.fileGenControl('set', 'CacheFolder', myCacheFolder, ...
-    'CodeGenFolder', myCodeGenFolder);
-
 %% Refresh SIMULINK Browser
 % This is used to make sure that custom libraries are re-loaded from the
 % project workspace
@@ -96,6 +104,20 @@ elseif exist(backupFile , 'file') == 2
     % Print message to screen.
     disp ('... Archive file found for current project - skipping export')
 end
+
+%% Update Template Folder
+% In this section the path that contains templates for use by other projects is defined.
+ProjectTemplatePath = 'C:\Users\chris\MATLAB\';
+
+myTemplate = Simulink.exportToTemplate(ProjObj, 'SimulinkProjectTemplate', ...
+                 'Group', 'Simulink', ...
+                 'Author', getenv('username'), ...
+                 'Description', 'This is my template to use a Simulink Project', ...
+                 'Title', 'Template Simulink Project', ...
+                 'ThumbnailFile', [projectRoot, '\AuxiliaryFunctions\ProjectManagement\TemplateThumbnailImage.png']);
+
+% Move the newly created template to the communal templates folder
+movefile(myTemplate, ProjectTemplatePath, 'f');
 
 %% Clean Up
 % clear up the workspace
