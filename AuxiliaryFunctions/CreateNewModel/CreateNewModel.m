@@ -24,7 +24,7 @@ clc;
 %% Create folder for new model
 % The folder to contain the suitable files and fodlers can now be created
 
-ParentFolder = '\Models\';
+ParentFolder = '\SubSystemModels\';
 folderName = NewModelName;
 
 try
